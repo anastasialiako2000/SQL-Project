@@ -1,0 +1,112 @@
+use DB109;
+
+/*
+DROP TABLE Includes;
+DROP TABLE Payment;
+DROP TABLE Orders;
+DROP TABLE Supplies;
+DROP TABLE Regular; 
+DROP TABLE Customer;
+DROP TABLE Supplier;
+DROP TABLE GeoArea;
+DROP TABLE Product;
+DROP TABLE Category;
+*/
+
+CREATE TABLE Category (
+      catCode INT PRIMARY KEY,
+	  catDescr VARCHAR(60)
+)
+
+CREATE TABLE Product (
+      prCode INT PRIMARY KEY,
+	  prName VARCHAR(100) NOT NULL,
+	  prDescr VARCHAR(100),
+	  price MONEY CHECK(price>0),
+	  prQuantity INT,
+	  catCode INT NOT NULL FOREIGN KEY REFERENCES Category
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+)
+
+CREATE TABLE GeoArea (
+      gaCode INT PRIMARY KEY,
+	  gaName VARCHAR(100) NOT NULL,
+	  population INT
+)
+
+CREATE TABLE Supplier(
+      sCode INT PRIMARY KEY,
+	  sAfm BIGINT NOT NULL,
+	  sName VARCHAR(100) NOT NULL,
+	  sCity VARCHAR(100),
+	  sNum INT,
+	  sRoad VARCHAR(100),
+	  sZip INT,
+	  sPhone BIGINT,
+	  gaCode INT NOT NULL FOREIGN KEY REFERENCES GeoArea
+	  	ON DELETE CASCADE
+		ON UPDATE CASCADE
+
+)
+
+CREATE TABLE Customer (
+      custCode INT PRIMARY KEY,
+	  custAfm BIGINT NOT NULL,
+	  custName VARCHAR(100) NOT NULL,
+	  custCity VARCHAR(100),
+	  custNum INT,
+	  custRoad VARCHAR(100),
+	  custZip INT,
+	  custPhone BIGINT,
+	  gaCode INT NOT NULL FOREIGN KEY REFERENCES GeoArea
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+)
+
+CREATE TABLE Regular (
+      custCode INT PRIMARY KEY,
+	  limit MONEY CHECK(limit>0),
+	  remnant MONEY CHECK(remnant>=0)
+	  FOREIGN KEY (custCode) REFERENCES Customer
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+)
+
+CREATE TABLE Supplies (
+      supCode INT PRIMARY KEY,
+	  sDate DATE,
+	  sQuantity INT,
+	  sCode INT FOREIGN KEY REFERENCES Supplier,
+	  prCode INT NOT NULL FOREIGN KEY REFERENCES Product
+	    ON DELETE CASCADE
+		ON UPDATE CASCADE
+)
+
+CREATE TABLE Orders (
+      ordCode INT PRIMARY KEY,
+	  orDate DATE,
+	  delDate DATE,
+	  custCode INT FOREIGN KEY REFERENCES Customer
+	    ON DELETE CASCADE
+		ON UPDATE CASCADE
+)
+
+CREATE TABLE Payment (
+      custCode INT NOT NULL FOREIGN KEY REFERENCES Regular
+	    ON DELETE CASCADE
+		ON UPDATE CASCADE,
+	  pDate DATE,
+	  amount MONEY,
+	  CONSTRAINT PayPrK PRIMARY KEY(custCode, pDate)
+)
+
+CREATE TABLE Includes (
+      ordCode INT NOT NULL FOREIGN KEY REFERENCES Orders
+	    ON DELETE CASCADE
+		ON UPDATE CASCADE,
+	  prCode INT NOT NULL FOREIGN KEY REFERENCES Product
+	    ON DELETE CASCADE
+		ON UPDATE CASCADE,
+	  orQuant INT
+)
